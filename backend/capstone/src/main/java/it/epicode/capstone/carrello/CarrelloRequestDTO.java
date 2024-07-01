@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CarrelloRequestDTO {
 
-    private Long utenteId;
+    //private Long utenteId;
     private double totaleAcquisto;
 
 }

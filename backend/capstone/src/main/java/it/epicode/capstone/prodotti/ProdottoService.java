@@ -1,14 +1,23 @@
 package it.epicode.capstone.prodotti;
 
+import com.cloudinary.utils.ObjectUtils;
 import it.epicode.capstone.categorie.Categoria;
 import it.epicode.capstone.categorie.CategoriaRepository;
 
 import it.epicode.capstone.errors.ResourceNotFoundException;
+import it.epicode.capstone.security.FileSizeExceededException;
+import it.epicode.capstone.utenti.Utente;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -18,6 +27,8 @@ public class ProdottoService {
 
     private final ProdottoRepository prodottoRepository;
     private final CategoriaRepository categoriaRepository;
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private String maxFileSize;
 
     public List<ProdottoResponseDTO> getAllProdotti() {
         return prodottoRepository.findAll().stream()
@@ -101,4 +112,5 @@ public class ProdottoService {
                 .withCategoria(prodotto.getCategoria())
                 .build();
     }
+
 }

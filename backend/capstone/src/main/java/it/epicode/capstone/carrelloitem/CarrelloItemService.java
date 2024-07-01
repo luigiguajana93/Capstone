@@ -5,6 +5,8 @@ import it.epicode.capstone.carrello.*;
 import it.epicode.capstone.prodotti.Prodotto;
 import it.epicode.capstone.prodotti.ProdottoRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class CarrelloItemService {
+
+    private static final Logger log = LoggerFactory.getLogger(CarrelloItemService.class);
+
     @Autowired
     private CarrelloItemRepository carrelloItemRepository;
 
@@ -51,7 +56,10 @@ public class CarrelloItemService {
 
         // Save updated CartItem
         CarrelloItem updatedCartItem = carrelloItemRepository.save(existingCartItem);
+        log.info("effettuato  CartItem updatedCartItem = cartItemRepository.save(existingCartItem);");
+        log.info("sto per eseguire updateCartTotalAmount(updatedCartItem.getCart());");
         updateCartTotalAmount(updatedCartItem.getCarrello());
+        log.info("ho eseguito updateCartTotalAmount(updatedCartItem.getCart()); sto per effettuare return");
         return mapCartItemToResponseDTO(updatedCartItem);
     }
 

@@ -13,5 +13,6 @@ public interface UtenteRepository extends JpaRepository<Utente,Long> {
     public List<UtenteResponsePrj> findAllBy();
 
     Optional<Utente> findOneByUsername(String username);
+    boolean existsByEmail(String email);
 
  }

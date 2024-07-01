@@ -1,17 +1,14 @@
 package it.epicode.capstone.utenti;
 
-import it.epicode.capstone.security.ApiValidationException;
+import com.cloudinary.Cloudinary;
 import it.epicode.capstone.security.LoginModel;
 import it.epicode.capstone.security.LoginResponseDTO;
-import it.epicode.capstone.security.SecurityUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +21,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UtenteController {
     private final UtenteService utenteService;
+
+    @Autowired
+    private UtenteRepository utenteRepository;
+
+    @Autowired
+    private Cloudinary cloudinary;
 
     @GetMapping
     public ResponseEntity<List<UtenteResponsePrj>> findAll() {
@@ -73,12 +76,29 @@ public class UtenteController {
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
-    @PatchMapping("/{id}/avatar")
-    public Utente uploadAvatar(@RequestParam("avatar") MultipartFile file, @PathVariable Long id) {
+    @PostMapping("/{username}/avatar")
+    public ResponseEntity<String> uploadAvatar(@PathVariable String username, @RequestParam("file") MultipartFile file) {
         try {
-            return utenteService.saveAvatar(id, file);
+            // Carica l'immagine su Cloudinary
+            var uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                    com.cloudinary.utils.ObjectUtils.asMap("public_id", username + "_avatar"));
+
+            // Recupera l'URL dell'immagine
+            String url = uploadResult.get("url").toString();
+
+            // Aggiorna l'utente con l'URL dell'immagine avatar
+            Optional<Utente> userOptional = utenteRepository.findOneByUsername(username);
+            if (userOptional.isPresent()) {
+                Utente user = userOptional.get();
+                user.setAvatar(url);
+                utenteRepository.save(user);
+                return ResponseEntity.ok(url);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload avatar");
         }
     }
 }

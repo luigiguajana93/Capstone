@@ -41,8 +41,6 @@ public class UtenteRequestDTO {
     private String civico;
     private String cap;
     private String numeroTelefono;
-    //private List<Roles> roles;
-
 
 
 

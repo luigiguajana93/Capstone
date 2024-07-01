@@ -33,10 +33,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,10 +47,10 @@ public class UtenteService {
     private final PasswordEncoder encoder;
     private final EmailService emailService;
     private final AuthenticationManager auth;
+    private final Cloudinary cloudinaryUrl;
 
-
-    @Value("${CLOUDINARY_URL}")
-    private String cloudinaryUrl;
+    @Value("${spring.servlet.multipart.max-file-size}")
+    private String maxFileSize;
 
     public List<UtenteResponsePrj> findAllUtenti() {
         return utenteRepository.findAllBy();
@@ -106,7 +103,6 @@ public class UtenteService {
 
         UtenteResponseDTO response = new UtenteResponseDTO();
         BeanUtils.copyProperties(entity, response);
-        //userRepository.save(entity);
         return response;
     }
 
@@ -126,8 +122,6 @@ public class UtenteService {
                 .withNumeroTelefono(utente.getNumeroTelefono())
                 .withAvatar(utente.getAvatar())
                 .withRoles(utente.getRoles())
-                .withOrdini(utente.getOrdini().stream().map(this::convertOrdineToDto).collect(Collectors.toList()))
-                .withNoleggi(utente.getNoleggi().stream().map(this::convertNoleggioToDto).collect(Collectors.toList()))
                 .build();
     }
 
@@ -226,7 +220,7 @@ public class UtenteService {
         admin.setRoles(new ArrayList<>(List.of(adminRole)));
 
         Utente savedAdmin = utenteRepository.save(admin);
-        //emailService.sendWelcomeEmail(savedAdmin.getEmail());
+        emailService.sendWelcomeEmail(savedAdmin.getEmail());
 
         return convertToDto(savedAdmin);
     }
@@ -246,7 +240,7 @@ public class UtenteService {
     utente.setRoles(new ArrayList<>(List.of(userRole)));
 
     Utente savedUtente = utenteRepository.save(utente);
-    //emailService.sendWelcomeEmail(savedUtente.getEmail());
+    emailService.sendWelcomeEmail(savedUtente.getEmail());
 
     return convertToDto(savedUtente);
     }
@@ -291,14 +285,86 @@ public class UtenteService {
                 .build();
     }
 
-    public Utente saveAvatar(Long id, MultipartFile file) throws IOException {
-        var user = utenteRepository.findById(id).orElseThrow(() -> new NonTrovatoException(id));
-        Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
-        var url = (String) cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("url");
-        user.setAvatar(url);
-        return utenteRepository.save(user);
+
+
+    public Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof SecurityUserDetails) {
+            SecurityUserDetails userDetails = (SecurityUserDetails) authentication.getPrincipal();
+            return userDetails.getUserId();
+        }
+        throw new IllegalStateException("Utente non autenticato");
     }
 
+    @Transactional
+    public String uploadAvatar(Long id, MultipartFile image) throws IOException {
+        long maxFileSize = getMaxFileSizeInBytes();
+        if (image.getSize() > maxFileSize) {
+            throw new FileSizeExceededException("File size exceeds the maximum allowed size");
+        }
+
+        Optional<Utente> optionalUser = utenteRepository.findById(id);
+        Utente user = optionalUser.orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+
+        String existingPublicId = user.getAvatar();
+        if (existingPublicId != null && !existingPublicId.isEmpty()) {
+            cloudinaryUrl.uploader().destroy(existingPublicId, ObjectUtils.emptyMap());
+        }
+
+        Map<String, Object> uploadResult = cloudinaryUrl.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
+        String publicId = (String) uploadResult.get("public_id");
+        String url = (String) uploadResult.get("url");
+
+        user.setAvatar(publicId);
+        utenteRepository.save(user);
+
+        return url;
+    }
+
+
+// DELETE delete cloudinary file
+
+    @Transactional
+    public String deleteAvatar(Long id) throws IOException {
+        Optional<Utente> optionalUser = utenteRepository.findById(id);
+        Utente user = optionalUser.orElseThrow(() -> new EntityNotFoundException("User not found with id: " + id));
+
+        String publicId = user.getAvatar();
+        if (publicId != null && !publicId.isEmpty()) {
+            cloudinaryUrl.uploader().destroy(publicId, ObjectUtils.emptyMap());
+            user.setAvatar(null);
+            utenteRepository.save(user);
+            return "Avatar deleted successfully";
+        } else {
+            return "No avatar found for deletion";
+        }
+    }
+
+
+    // PUT update cloudinary file
+    @Transactional
+    public String updateAvatar(Long id, MultipartFile updatedImage) throws IOException {
+        deleteAvatar(id);
+        return uploadAvatar(id, updatedImage);
+    }
+
+    public long getMaxFileSizeInBytes() {
+        String[] parts = maxFileSize.split("(?i)(?<=[0-9])(?=[a-z])");
+        long size = Long.parseLong(parts[0]);
+        String unit = parts[1].toUpperCase();
+        switch (unit) {
+            case "KB":
+                size *= 1024;
+                break;
+            case "MB":
+                size *= 1024 * 1024;
+                break;
+            case "GB":
+                size *= 1024 * 1024 * 1024;
+                break;
+        }
+        return size;
+    }
 
 }
 

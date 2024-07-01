@@ -1,8 +1,10 @@
 package it.epicode.capstone.security;
+import org.eclipse.angus.mail.util.MailSSLSocketFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.security.GeneralSecurityException;
 import java.util.Properties;
 
 @Configuration
@@ -64,12 +67,18 @@ public class ApplicationSecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/carrelli").authenticated()
                                 .requestMatchers(HttpMethod.PUT, "/api/utenti/{id}").authenticated()
                                 .requestMatchers(HttpMethod.DELETE, "/api/utenti/{id}").authenticated()
-                                .requestMatchers(HttpMethod.PATCH, "/api/utenti/{id}/avatar").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/utenti/{username}/avatar").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/utenti/{username}/avatar").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/utenti/{username}/avatar").authenticated()
 
                                 .requestMatchers(HttpMethod.GET, "/api/prodotti/**").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/prodotti/**").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/api/prodotti/**").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/api/prodotti/**").hasAuthority("ADMIN")
+
+                                .requestMatchers(HttpMethod.POST, "/api/utenti/{id}/avatar").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/utenti/{id}/avatar").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/utenti/{id}/avatar").hasAuthority("ADMIN")
 
                                 .requestMatchers(HttpMethod.GET, "/api/categorie/**").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/categorie/**").hasAuthority("ADMIN")
@@ -97,29 +106,26 @@ public class ApplicationSecurityConfig {
     }
 
     @Bean
-    public JavaMailSenderImpl getJavaMailSender(@Value("${gmail.mail.transport.protocol}" )String protocol,
-                                                @Value("${gmail.mail.smtp.auth}" ) String auth,
-                                                @Value("${gmail.mail.smtp.starttls.enable}" )String starttls,
-                                                @Value("${gmail.mail.debug}" )String debug,
-                                                @Value("${gmail.mail.from}" )String from,
-                                                @Value("${gmail.mail.from.password}" )String password,
-                                                @Value("${gmail.smtp.ssl.enable}" )String ssl,
-                                                @Value("${gmail.smtp.host}" )String host,
-                                                @Value("${gmail.smtp.port}" )String port){
-
+    public JavaMailSender getJavaMailSender(@Value("${gmail.mail.from}") String from,
+                                            @Value("${gmail.mail.from.password}") String password,
+                                            @Value("${gmail.smtp.host}") String host,
+                                            @Value("${gmail.smtp.port}") int port) throws GeneralSecurityException {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
         mailSender.setHost(host);
-        mailSender.setPort(Integer.parseInt(port));
-
+        mailSender.setPort(port);
         mailSender.setUsername(from);
         mailSender.setPassword(password);
 
         Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", protocol);
-        props.put("mail.smtp.auth", auth);
-        props.put("mail.smtp.starttls.enable", starttls);
-        props.put("mail.debug", debug);
-        props.put("smtp.ssl.enable", ssl);
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.debug", "true");
+
+        // Disabilitare la verifica del certificato SSL
+        MailSSLSocketFactory socketFactory = new MailSSLSocketFactory();
+        socketFactory.setTrustAllHosts(true);
+        props.put("mail.smtp.ssl.socketFactory", socketFactory);
 
         return mailSender;
     }

@@ -30,7 +30,6 @@ public class UtenteResponseDTO {
     private String numeroTelefono;
     private String avatar;
     private List<Roles> roles;
-    private List<OrdineResponseDTO> ordini;
-    private List<NoleggioResponseDTO> noleggi;
+
 
 }

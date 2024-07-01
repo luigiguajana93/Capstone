@@ -4,9 +4,11 @@ import it.epicode.capstone.carrelloitem.CarrelloItem;
 import it.epicode.capstone.carrelloitem.CarrelloItemRepository;
 import it.epicode.capstone.carrelloitem.CarrelloItemResponseDTO;
 import it.epicode.capstone.errors.ResourceNotFoundException;
+import it.epicode.capstone.prodotti.ProdottoRepository;
 import it.epicode.capstone.security.SecurityUserDetails;
 import it.epicode.capstone.utenti.Utente;
 import it.epicode.capstone.utenti.UtenteRepository;
+import it.epicode.capstone.utenti.UtenteService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,16 @@ public class CarrelloService {
     @Autowired
     private UtenteRepository utenteRepository;
 
+    @Autowired
+    private UtenteService utenteService;
+
+    @Autowired
+    private CarrelloItemRepository carrelloItemRepository;
+
+    @Autowired
+    private ProdottoRepository prodottoRepository;
+
+
     public CarrelloResponseDTO findById(Long cartId) {
         Carrello cart = carrelloRepository.findById(cartId)
                 .orElseThrow(() -> new EntityNotFoundException("Carrello non trovato con id : " + cartId));
@@ -34,7 +46,14 @@ public class CarrelloService {
     }
 
     public CarrelloResponseDTO save(CarrelloRequestDTO requestDTO) {
-        Carrello cart = mapRequestDTOToCart(requestDTO);
+        Long userId = utenteService.getCurrentUserId(); // Ottieni l'ID utente dal JWT
+        Utente utente = utenteRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utente non trovato"));
+
+        Carrello cart = new Carrello();
+        cart.setUtente(utente);
+        cart.setTotaleAcquisto(requestDTO.getTotaleAcquisto());
+
         Carrello savedCart = carrelloRepository.save(cart);
         return mapCartToResponseDTO(savedCart);
     }
@@ -44,12 +63,12 @@ public class CarrelloService {
         Carrello existingCart = carrelloRepository.findById(cartId)
                 .orElseThrow(() -> new EntityNotFoundException("Carrello non trovato con id: " + cartId));
 
-
-        Utente utente = utenteRepository.findById(requestDTO.getUtenteId())
-                .orElseThrow(() -> new EntityNotFoundException("Utente non trovato con id " + requestDTO.getUtenteId()));
+        Long utenteId = utenteService.getCurrentUserId();
+        Utente utente = utenteRepository.findById(utenteId)
+                .orElseThrow(() -> new EntityNotFoundException("Utente non trovato con id " + utenteId));
 
         existingCart.setUtente(utente);
-        existingCart.setTotaleAcquisto(calcoloTotaleAcquisto(existingCart));
+        existingCart.setTotaleAcquisto(requestDTO.getTotaleAcquisto());
 
         Carrello updatedCart = carrelloRepository.save(existingCart);
         return mapCartToResponseDTO(updatedCart);
@@ -94,32 +113,38 @@ public class CarrelloService {
         return responseDTO;
     }
 
-    private Carrello mapRequestDTOToCart(CarrelloRequestDTO requestDTO) {
-        Carrello cart = new Carrello();
-
+   // private Carrello mapRequestDTOToCart(CarrelloRequestDTO requestDTO) {
+     //   Carrello cart = new Carrello();
+//
         // Fetch user from repository based on userId in requestDTO
-        Utente utente = utenteRepository.findById(requestDTO.getUtenteId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + requestDTO.getUtenteId()));
+     //   Utente utente = utenteRepository.findById(requestDTO.getUtenteId())
+     //           .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + requestDTO.getUtenteId()));
 
-        cart.setUtente(utente);
-        return cart;
-    }
+    //    cart.setUtente(utente);
+    //    return cart;
+   // }
 
     public double calcoloTotaleAcquisto(Carrello cart) {
         log.info("calcoloTotaleAcquisto avviata");
         double tempt= cart.getCarrelloItems().stream()
                 .mapToDouble(CarrelloItem::getPrezzo)
                 .sum();
-        log.info("calcolo totale: " + tempt);
+        log.info("calcolo totale: {}", tempt);
         return tempt;
     }
 
-    // Metodo per ottenere l'ID dell'utente dal contesto di sicurezza
-    private Long getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.getPrincipal() instanceof SecurityUserDetails userDetails) {
-            return userDetails.getUserId();
+    @Transactional
+    public void clearCart(Long cartId) {
+        Carrello cart = carrelloRepository.findById(cartId)
+                .orElseThrow(() -> new EntityNotFoundException("Cart not found with id: " + cartId));
+
+        List<CarrelloItem> cartItems = cart.getCarrelloItems();
+        for (CarrelloItem cartItem : cartItems) {
+            carrelloItemRepository.delete(cartItem);
         }
-        throw new IllegalStateException("Utente non autenticato");
+
+        cart.getCarrelloItems().clear();
+        cart.setTotaleAcquisto(0.0);
+        carrelloRepository.save(cart);
     }
 }

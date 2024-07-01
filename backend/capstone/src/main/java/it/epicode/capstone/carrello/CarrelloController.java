@@ -44,4 +44,13 @@ public class CarrelloController {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/purchase/{id}")
+    public ResponseEntity<Void> purchase(@PathVariable Long id) {
+        // Gestire il processo di acquisto...
+
+        // Svuotare il carrello dopo l'acquisto
+        carrelloService.clearCart(id);
+
+        return ResponseEntity.ok().build();
+    }
 }
