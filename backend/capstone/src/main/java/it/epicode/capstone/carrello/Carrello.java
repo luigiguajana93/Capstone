@@ -23,6 +23,7 @@ public class Carrello {
     @JoinColumn(name = "utente_id")
     private Utente utente;
 
+
     @OneToMany(mappedBy = "carrello", cascade = CascadeType.ALL)
     private List<CarrelloItem> CarrelloItems = new ArrayList<>();
 
