@@ -7,4 +7,5 @@ import java.util.List;
 
 @Repository
 public interface NoleggioRepository extends JpaRepository<RegistroNoleggio,Long> {
+
 }

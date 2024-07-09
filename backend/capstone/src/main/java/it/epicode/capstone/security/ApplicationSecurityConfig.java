@@ -1,4 +1,5 @@
 package it.epicode.capstone.security;
+
 import org.eclipse.angus.mail.util.MailSSLSocketFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +25,6 @@ import java.security.GeneralSecurityException;
 import java.util.Properties;
 
 @Configuration
-//QUESTA ANNOTAZIONE SERVE A COMUNICARE A SPRING CHE QUESTA  CLASSE Ã¨ UTILIZZATA PER CONFIGURARE LA SECURITY
 @EnableWebSecurity()
 @EnableMethodSecurity(prePostEnabled = true)
 public class ApplicationSecurityConfig {
@@ -63,40 +63,35 @@ public class ApplicationSecurityConfig {
                                 .requestMatchers("/api/utenti/login").permitAll()
                                 .requestMatchers("/api/utenti/registerAdmin").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/utenti/register").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/**").authenticated()
-                                .requestMatchers(HttpMethod.POST, "/api/carrelli").authenticated()
-                                .requestMatchers(HttpMethod.PUT, "/api/utenti/{id}").authenticated()
-                                .requestMatchers(HttpMethod.DELETE, "/api/utenti/{id}").authenticated()
-                                .requestMatchers(HttpMethod.POST, "/api/utenti/{username}/avatar").authenticated()
-                                .requestMatchers(HttpMethod.DELETE, "/api/utenti/{username}/avatar").authenticated()
-                                .requestMatchers(HttpMethod.PUT, "/api/utenti/{username}/avatar").authenticated()
 
                                 .requestMatchers(HttpMethod.GET, "/api/prodotti/**").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/prodotti/**").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/api/prodotti/**").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/api/prodotti/**").hasAuthority("ADMIN")
 
-                                .requestMatchers(HttpMethod.POST, "/api/utenti/{id}/avatar").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/api/utenti/{id}/avatar").hasAuthority("ADMIN")
-                                .requestMatchers(HttpMethod.PUT, "/api/utenti/{id}/avatar").hasAuthority("ADMIN")
-
                                 .requestMatchers(HttpMethod.GET, "/api/categorie/**").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/categorie/**").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/api/categorie/**").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/api/categorie/**").hasAuthority("ADMIN")
 
-                                .requestMatchers( HttpMethod.GET,"/api/ordini/**").authenticated()
-                                .requestMatchers( HttpMethod.POST,"/api/ordini/**").authenticated()
-                                .requestMatchers( HttpMethod.PUT, "/api/ordini/**").authenticated()
-                                .requestMatchers( HttpMethod.DELETE,"/api/ordini/**").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/ordini/**").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/ordini/**").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/ordini/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/ordini/**").authenticated()
 
-                                .requestMatchers( HttpMethod.GET,"/api/noleggi/**").authenticated()
-                                .requestMatchers( HttpMethod.POST,"/api/noleggi/**").authenticated()
-                                .requestMatchers( HttpMethod.PUT, "/api/noleggi/**").authenticated()
-                                .requestMatchers( HttpMethod.DELETE,"/api/noleggi/**").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/noleggi/**").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/noleggi/**").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/noleggi/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/noleggi/**").authenticated()
+
+                                .requestMatchers(HttpMethod.GET, "/api/carrelli/**").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/api/carrelli/**").authenticated()
+                                .requestMatchers(HttpMethod.PUT, "/api/carrelli/**").authenticated()
+                                .requestMatchers(HttpMethod.DELETE, "/api/carrelli/**").authenticated()
 
                                 .requestMatchers(HttpMethod.PUT, "/**").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/**").hasAuthority("ADMIN")
+                                .requestMatchers("/**").permitAll()
                 )
                 .httpBasic(Customizer.withDefaults())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

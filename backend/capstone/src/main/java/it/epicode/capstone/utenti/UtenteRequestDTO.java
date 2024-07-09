@@ -35,11 +35,28 @@ public class UtenteRequestDTO {
     @Size(max = 125, message = "La password è troppo lunga, max 125 caratteri")
     private String password;
 
+    @NotBlank(message = "La citta non può contenere solo spazi vuoti")
+    @Size(max = 125, message = "La citta è troppo lunga, max 125 caratteri")
     private String citta;
+
+    @NotBlank(message = "Il tipo di indirizzo non può contenere solo spazi vuoti")
+    @Size(max = 125, message = "Il tipo di indirizzo è troppo lunga, max 125 caratteri")
     private String tipoIndirizzo;
+
+    @NotBlank(message = "L' indirizzo non può contenere solo spazi vuoti")
+    @Size(max = 125, message = "L'indirizzo è troppo lungo, max 125 caratteri")
     private String indirizzo;
+
+    @NotBlank(message = "Il civico non può contenere solo spazi vuoti")
+    @Size(max = 10, message = "Il civico è troppo lungo, max 10 caratteri")
     private String civico;
+
+    @NotBlank(message = "La Codice Postale non può contenere solo spazi vuoti")
+    @Size(max = 10, message = "il Codice Postale è troppo lungo, max 10 caratteri")
     private String cap;
+
+    @NotBlank(message = "La numero di Telefono non può contenere solo spazi vuoti")
+    @Size(max = 15, message = "Il numero di Telefono è troppo lungo, max 15 caratteri")
     private String numeroTelefono;
 
 

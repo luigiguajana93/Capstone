@@ -34,8 +34,9 @@ public class RegistroNoleggio {
     private LocalDate dataFineNoleggio;
 
     @ManyToMany
-    private List<Prodotto> prodottiNoleggiati;
+    private List<Prodotto> prodottiNoleggiati = new ArrayList<>();
 
+    private CittaNoleggio cittaNoleggio;
 
     private Double costoNoleggioTotale;
 }

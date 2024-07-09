@@ -13,11 +13,11 @@ public class CategoriaService {
     @Autowired
     private CategoriaRepository categoriaRepository;
 
-    public List<Categoria> findAll(){
+    public List<Categoria> getAllCategoria(){
         return categoriaRepository.findAll();
     }
 
-    public CategoriaResponseDTO findById(Long id){
+    public CategoriaResponseDTO getCategoriaById(Long id){
         if(!categoriaRepository.existsById(id)){
             throw new EntityNotFoundException("Categoria non trovata");
         }

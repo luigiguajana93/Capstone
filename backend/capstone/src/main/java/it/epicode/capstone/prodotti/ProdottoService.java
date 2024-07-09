@@ -43,7 +43,7 @@ public class ProdottoService {
     }
 
     public List<ProdottoResponseDTO> getProdottiByNome(String nomeProdotto) {
-        return prodottoRepository.findByNomeProdotto(nomeProdotto).stream()
+        return prodottoRepository.findByNomeProdottoContaining(nomeProdotto).stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
@@ -112,5 +112,6 @@ public class ProdottoService {
                 .withCategoria(prodotto.getCategoria())
                 .build();
     }
+
 
 }

@@ -19,6 +19,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/utenti")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class UtenteController {
     private final UtenteService utenteService;
 
@@ -40,6 +41,7 @@ public class UtenteController {
         return ResponseEntity.ok(utente);
     }
 
+
     @PostMapping
     public ResponseEntity<UtenteResponseDTO> create(@RequestBody @Valid UtenteRequestDTO request) {
         UtenteResponseDTO nuovoUtente = utenteService.save(request);
@@ -51,6 +53,7 @@ public class UtenteController {
         UtenteResponseDTO utenteAggiornato = utenteService.update(id, request);
         return ResponseEntity.ok(utenteAggiornato);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable Long id) {

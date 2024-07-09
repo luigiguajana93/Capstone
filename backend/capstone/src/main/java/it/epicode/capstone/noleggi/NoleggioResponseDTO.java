@@ -1,6 +1,7 @@
 package it.epicode.capstone.noleggi;
 
 
+import it.epicode.capstone.prodotti.Prodotto;
 import it.epicode.capstone.prodotti.ProdottoResponseDTO;
 
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class NoleggioResponseDTO {
     private LocalDate dataInizioNoleggio;
     private LocalDate dataFineNoleggio;
     private Double costoNoleggioTotale;
-    //private List<ProdottoResponseDTO> prodottiNoleggiati;
+    private CittaNoleggio cittaNoleggio;
+    private List<Prodotto> prodottiNoleggiati;
 
 }

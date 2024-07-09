@@ -15,5 +15,5 @@ public class NoleggioRequestDTO {
     private List<Long> prodottiId;
     private LocalDate dataInizioNoleggio;
     private LocalDate dataFineNoleggio;
-
+    private CittaNoleggio cittaNoleggio;
 }

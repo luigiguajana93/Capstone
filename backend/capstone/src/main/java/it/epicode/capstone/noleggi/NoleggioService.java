@@ -52,6 +52,7 @@ public class NoleggioService {
         noleggio.setCostoNoleggioTotale(costoNoleggioTotale);
         noleggio.setDataInizioNoleggio(noleggioRequestDTO.getDataInizioNoleggio());
         noleggio.setDataFineNoleggio(noleggioRequestDTO.getDataFineNoleggio());
+        noleggio.setCittaNoleggio(noleggioRequestDTO.getCittaNoleggio()); // Imposta la città di noleggio
 
         RegistroNoleggio noleggioSalvato = noleggioRepository.save(noleggio);
 
@@ -84,6 +85,7 @@ public class NoleggioService {
         noleggio.setCostoNoleggioTotale(costoNoleggioTotale);
         noleggio.setDataInizioNoleggio(noleggioRequestDTO.getDataInizioNoleggio());
         noleggio.setDataFineNoleggio(noleggioRequestDTO.getDataFineNoleggio());
+        noleggio.setCittaNoleggio(noleggioRequestDTO.getCittaNoleggio()); // Imposta la città di noleggio
 
         RegistroNoleggio noleggioModificato = noleggioRepository.save(noleggio);
 
@@ -112,6 +114,8 @@ public class NoleggioService {
                 .withDataInizioNoleggio(noleggio.getDataInizioNoleggio())
                 .withDataFineNoleggio(noleggio.getDataFineNoleggio())
                 .withCostoNoleggioTotale(noleggio.getCostoNoleggioTotale())
+                .withCittaNoleggio(noleggio.getCittaNoleggio())
+                .withProdottiNoleggiati(noleggio.getProdottiNoleggiati())
                 .build();
     }
 }

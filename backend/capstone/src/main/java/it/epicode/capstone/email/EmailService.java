@@ -26,13 +26,30 @@ public class EmailService {
 
         try {
             helper.setTo(recipientEmail);
-            helper.setSubject("Benvenuto nella nostra applicazione!");
-            helper.setText("Grazie per esserti registrato. Benvenuto!");
+            helper.setSubject("Benvenuto in MusicEveryWhere!");
+            helper.setText("Grazie per esserti registrato. Ti diamo il Benvenuto nella nostra applicazione MusicEveryWhere!");
 
             emailSender.send(message);
         } catch (MessagingException e) {
             e.printStackTrace(); // gestisci l'errore in modo adeguato
             throw new RuntimeException("Failed to send email", e);
+        }
+    }
+
+
+
+    public void sendPurchaseConfirmationEmail(String recipientEmail) {
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+
+        try {
+            helper.setTo(recipientEmail);
+            helper.setSubject("Conferma di Acquisto");
+            helper.setText("Complimenti per l'ottima scelta! Il tuo ordine è stato ricevuto e verrà elaborato a breve.");
+
+            emailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace(); // gestisci l'errore in modo adeguato
         }
     }
 }
