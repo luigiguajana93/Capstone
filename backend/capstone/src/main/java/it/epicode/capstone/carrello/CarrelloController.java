@@ -20,12 +20,7 @@ public class CarrelloController {
         return carrelloService.getAllCarrelli();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Carrello> getCarrelloById(@PathVariable Long id) {
-        return carrelloService.getCarrelloById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+
 
     @PostMapping
     public ResponseEntity<Carrello> createCarrello(@RequestBody CarrelloRequestDTO carrelloRequestDTO) {

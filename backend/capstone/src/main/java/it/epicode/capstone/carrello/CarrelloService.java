@@ -30,10 +30,6 @@ public class CarrelloService {
         return carrelloRepository.findAll();
     }
 
-    public Optional<Carrello> getCarrelloById(Long id) {
-        return carrelloRepository.findById(id);
-    }
-
     @Transactional
     public Carrello createCarrello(CarrelloRequestDTO carrelloRequestDTO) {
         Utente utente = utenteRepository.findById(carrelloRequestDTO.getUserId())
