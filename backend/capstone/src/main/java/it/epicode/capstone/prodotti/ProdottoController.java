@@ -5,8 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/prodotti")
@@ -57,7 +61,20 @@ public class ProdottoController {
         return ResponseEntity.ok(result);
     }
 
+    //aggiunta immagine prodotto
 
+    @PostMapping("/upload")
+    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            String imageUrl = prodottoService.uploadImage(file);
+            Map<String, String> response = new HashMap<>();
+            response.put("url", imageUrl);
+            return ResponseEntity.ok(response);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
 
 }

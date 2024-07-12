@@ -1,5 +1,6 @@
 package it.epicode.capstone.prodotti;
 
+import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import it.epicode.capstone.categorie.Categoria;
 import it.epicode.capstone.categorie.CategoriaRepository;
@@ -30,6 +31,8 @@ public class ProdottoService {
     private final ProdottoRepository prodottoRepository;
     private final CategoriaRepository categoriaRepository;
     private final NoleggioRepository noleggioRepository;
+    private final Cloudinary cloudinary;
+
 
     @Value("${spring.servlet.multipart.max-file-size}")
     private String maxFileSize;
@@ -125,4 +128,34 @@ public class ProdottoService {
     }
 
 
+
+    //aggiunta img prodotto
+
+    public String uploadImage(MultipartFile file) throws IOException {
+        long maxFileSize = getMaxFileSizeInBytes();
+        if (file.getSize() > maxFileSize) {
+            throw new FileSizeExceededException("File size exceeds the maximum allowed size");
+        }
+
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        return (String) uploadResult.get("url");
+    }
+
+    public long getMaxFileSizeInBytes() {
+        String[] parts = maxFileSize.split("(?i)(?<=[0-9])(?=[a-z])");
+        long size = Long.parseLong(parts[0]);
+        String unit = parts[1].toUpperCase();
+        switch (unit) {
+            case "KB":
+                size *= 1024;
+                break;
+            case "MB":
+                size *= 1024 * 1024;
+                break;
+            case "GB":
+                size *= 1024 * 1024 * 1024;
+                break;
+        }
+        return size;
+    }
 }
