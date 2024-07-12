@@ -37,7 +37,7 @@ public class EmailService {
     }
 
 
-
+//EMAIL PER ACQUISTO CARRELLO
     public void sendPurchaseConfirmationEmail(String recipientEmail) {
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message);
@@ -52,4 +52,22 @@ public class EmailService {
             e.printStackTrace(); // gestisci l'errore in modo adeguato
         }
     }
+
+    //EMAIL PER ACQUISTO NOLEGGIO
+    public void sendPurchaseConfirmationEmailRental(String recipientEmail) {
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+
+        try {
+            helper.setTo(recipientEmail);
+            helper.setSubject("Conferma di Noleggio");
+            helper.setText("Complimenti per l'ottima scelta! Il tuo ordine è stato ricevuto e verrà elaborato a breve.");
+
+            emailSender.send(message);
+        } catch (MessagingException e) {
+            e.printStackTrace(); // gestisci l'errore in modo adeguato
+        }
+    }
+
+
 }

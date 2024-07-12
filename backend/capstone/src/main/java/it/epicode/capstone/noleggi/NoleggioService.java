@@ -1,5 +1,6 @@
 package it.epicode.capstone.noleggi;
 
+import it.epicode.capstone.email.EmailService;
 import it.epicode.capstone.errors.ResourceNotFoundException;
 import it.epicode.capstone.prodotti.Prodotto;
 import it.epicode.capstone.prodotti.ProdottoRepository;
@@ -7,6 +8,7 @@ import it.epicode.capstone.utenti.Utente;
 import it.epicode.capstone.utenti.UtenteRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,6 +23,7 @@ public class NoleggioService {
     private final NoleggioRepository noleggioRepository;
     private final ProdottoRepository prodottoRepository;
     private final UtenteRepository utenteRepository;
+    private final EmailService emailService;
 
     public List<RegistroNoleggio> findAllNoleggi() {
         return noleggioRepository.findAll();
@@ -55,6 +58,11 @@ public class NoleggioService {
         noleggio.setCittaNoleggio(noleggioRequestDTO.getCittaNoleggio()); // Imposta la città di noleggio
 
         RegistroNoleggio noleggioSalvato = noleggioRepository.save(noleggio);
+        // Ottenere l'email dell'utente
+        String email = utente.getEmail();
+
+        // Inviare email di conferma acquisto
+        emailService.sendPurchaseConfirmationEmailRental(email);
 
         return convertNoleggioToDto(noleggioSalvato);
     }

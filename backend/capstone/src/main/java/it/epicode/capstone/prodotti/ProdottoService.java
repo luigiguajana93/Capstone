@@ -5,6 +5,8 @@ import it.epicode.capstone.categorie.Categoria;
 import it.epicode.capstone.categorie.CategoriaRepository;
 
 import it.epicode.capstone.errors.ResourceNotFoundException;
+import it.epicode.capstone.noleggi.NoleggioRepository;
+import it.epicode.capstone.noleggi.RegistroNoleggio;
 import it.epicode.capstone.security.FileSizeExceededException;
 import it.epicode.capstone.utenti.Utente;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,6 +29,8 @@ public class ProdottoService {
 
     private final ProdottoRepository prodottoRepository;
     private final CategoriaRepository categoriaRepository;
+    private final NoleggioRepository noleggioRepository;
+
     @Value("${spring.servlet.multipart.max-file-size}")
     private String maxFileSize;
 
@@ -94,6 +98,13 @@ public class ProdottoService {
 
     @Transactional
     public String deleteProdotto(Long id) {
+        List<RegistroNoleggio> noleggiConProdotto = noleggioRepository.findByProdottiNoleggiati_Id(id);
+
+        for (RegistroNoleggio noleggio : noleggiConProdotto) {
+            noleggio.getProdottiNoleggiati().removeIf(prodotto -> prodotto.getId().equals(id));
+            noleggioRepository.save(noleggio);
+        }
+
         if (!prodottoRepository.existsById(id)) {
             throw new ResourceNotFoundException("Prodotto non trovato con id: " + id);
         }

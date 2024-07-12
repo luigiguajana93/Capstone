@@ -16,7 +16,7 @@ import java.util.List;
 @Builder(setterPrefix = "with")
 public class Categoria {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(length = 50, unique = true)

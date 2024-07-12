@@ -34,6 +34,11 @@ public class RegistroNoleggio {
     private LocalDate dataFineNoleggio;
 
     @ManyToMany
+    @JoinTable(
+            name = "noleggi_prodotti_noleggiati",
+            joinColumns = @JoinColumn(name = "noleggio_id"),
+            inverseJoinColumns = @JoinColumn(name = "prodotto_id")
+    )
     private List<Prodotto> prodottiNoleggiati = new ArrayList<>();
 
     private CittaNoleggio cittaNoleggio;

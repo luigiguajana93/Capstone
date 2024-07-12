@@ -64,6 +64,8 @@ public class ApplicationSecurityConfig {
                                 .requestMatchers("/api/utenti/registerAdmin").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/utenti/register").permitAll()
 
+                                .requestMatchers(HttpMethod.PUT, "/api/utenti/**").authenticated()
+
                                 .requestMatchers(HttpMethod.GET, "/api/prodotti/**").authenticated()
                                 .requestMatchers(HttpMethod.POST, "/api/prodotti/**").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/api/prodotti/**").hasAuthority("ADMIN")
